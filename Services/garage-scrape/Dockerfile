@@ -6,6 +6,18 @@ WORKDIR /workspace
 
 RUN microdnf install -y maven zip && microdnf clean all
 
+COPY certs ./certs
+RUN keytool -importcert -noprompt -trustcacerts \
+        -alias incommon-rsa-ov-ssl-ca-3 \
+        -file certs/incommon-rsa-ov-ssl-ca-3.pem \
+        -keystore "$JAVA_HOME/lib/security/cacerts" \
+        -storepass changeit \
+    && keytool -importcert -noprompt -trustcacerts \
+        -alias sectigo-public-server-authentication-root-r46 \
+        -file certs/sectigo-public-server-authentication-root-r46.pem \
+        -keystore "$JAVA_HOME/lib/security/cacerts" \
+        -storepass changeit
+
 COPY pom.xml .
 RUN mvn -B -DskipTests dependency:go-offline
 
